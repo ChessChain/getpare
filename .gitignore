@@ -1,0 +1,79 @@
+# Pare — .gitignore (Swift + macOS + Xcode + VS Code)
+
+# === Build artefacts ===
+.build/
+.swiftpm/
+DerivedData/
+build/
+dist/
+*.xcarchive
+*.xcresult
+*.dSYM/
+*.dSYM.zip
+*.ipa
+*.app/
+*.dmg
+*.pkg
+
+# === Xcode user data (keep .xcodeproj/project.pbxproj, ignore the rest) ===
+xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata
+*.xcworkspace/xcuserdata
+*.xcuserstate
+*.moved-aside
+
+# Carthage / CocoaPods if ever added
+Pods/
+Carthage/Build/
+
+# === Swift Package Manager local state ===
+Package.resolved.bak
+
+# === Tests ===
+*.coverage
+coverage/
+*.profdata
+*.profraw
+
+# === Secrets / signing (never commit) ===
+*.p12
+*.cer
+*.certSigningRequest
+*.mobileprovision
+*.provisionprofile
+ExportOptions.plist
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+.env
+.env.*
+secrets/
+notarisation-credentials.json
+
+# === macOS clutter ===
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# === VS Code (keep settings.json + extensions.json + launch.json) ===
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# === Editor backups ===
+*~
+*.swp
+*.swo
+.idea/
+
+# === Sparkle appcast staging ===
+appcast.xml.unsigned
