@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  build-sign-notarise:
+    runs-on: [self-hosted, macOS, arm64]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.app
+
+      - name: Import signing certs
+        env:
+          DEV_ID_CERT_BASE64: ${{ secrets.DEV_ID_CERT_BASE64 }}
+          DEV_ID_CERT_PASSWORD: ${{ secrets.DEV_ID_CERT_PASSWORD }}
+        run: ./Tools/import-certs.sh
+
+      - name: Build (Universal Binary)
+        run: |
+          xcodebuild -workspace Pare.xcworkspace \
+            -scheme Pare \
+            -configuration Release \
+            -destination "generic/platform=macOS" \
+            ARCHS="arm64 x86_64" \
+            ONLY_ACTIVE_ARCH=NO \
+            archive -archivePath build/Pare.xcarchive
+
+      - name: Export & sign
+        run: ./Tools/sign-helper.sh build/Pare.xcarchive
+
+      - name: Notarise
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: ./Tools/notarise.sh build/Pare.app
+
+      - name: Package DMG
+        run: ./Tools/package-dmg.sh build/Pare.app dist/Pare.dmg
+
+      - name: Sign Sparkle appcast
+        env:
+          SPARKLE_EDDSA_KEY: ${{ secrets.SPARKLE_EDDSA_KEY }}
+        run: ./Tools/sign-appcast.sh dist/
+
+      - name: Upload to release CDN
+        run: ./Tools/upload-release.sh dist/

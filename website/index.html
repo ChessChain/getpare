@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pare — Reclaim your Mac</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;450;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- LemonSqueezy checkout overlay -->
+<script src="https://app.lemonsqueezy.com/js/lemon.js" defer></script>
+
+<style>
+:root {
+  --bg: #FAFAF7;
+  --surface: #FFFFFF;
+  --surface-2: #F4F3EE;
+  --line: #E8E6DF;
+  --line-strong: #D4D1C7;
+  --ink: #15140F;
+  --ink-2: #3A3833;
+  --ink-3: #6B6862;
+  --ink-4: #97948C;
+  --accent: #1B5E3F;
+  --accent-soft: #E8F0EB;
+  --accent-line: #B8D4C1;
+  --warning: #B8742C;
+  --danger: #8B2E2E;
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+
+/* --- Nav --- */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(250,250,247,0.85);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--line);
+}
+.nav-inner {
+  max-width: 1100px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 24px;
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-display); font-weight: 500; font-size: 20px;
+  text-decoration: none; color: var(--ink); letter-spacing: -0.02em;
+}
+.nav-mark {
+  width: 28px; height: 28px; background: var(--ink); border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--bg); font-size: 15px; font-weight: 500;
+}
+.nav-links { display: flex; gap: 28px; align-items: center; }
+.nav-links a {
+  font-size: 14px; color: var(--ink-2); text-decoration: none; font-weight: 450;
+  transition: color 0.15s;
+}
+.nav-links a:hover { color: var(--ink); }
+.nav-cta {
+  background: var(--ink) !important; color: var(--bg) !important;
+  padding: 8px 20px; border-radius: 8px; font-weight: 500 !important;
+}
+.nav-cta:hover { background: var(--ink-2) !important; }
+
+/* --- Hero --- */
+.hero {
+  padding: 160px 24px 100px;
+  text-align: center;
+  max-width: 800px; margin: 0 auto;
+}
+.hero-mark {
+  width: 84px; height: 84px; margin: 0 auto 28px;
+  background: var(--ink); border-radius: 22px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--bg); font-family: var(--font-display);
+  font-size: 44px; font-weight: 500; letter-spacing: -0.04em;
+  box-shadow: 0 10px 30px rgba(21,20,15,0.18);
+}
+.hero h1 {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: 56px; letter-spacing: -0.035em; line-height: 1.05;
+  margin-bottom: 20px;
+}
+.hero h1 em { font-style: italic; }
+.hero p {
+  font-size: 18px; color: var(--ink-2); line-height: 1.6;
+  max-width: 540px; margin: 0 auto 36px;
+}
+.hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 28px; border-radius: 10px;
+  font-family: var(--font-body); font-size: 15px; font-weight: 500;
+  text-decoration: none; border: none; cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-primary { background: var(--ink); color: var(--bg); }
+.btn-primary:hover { background: var(--ink-2); transform: translateY(-1px); }
+.btn-secondary { background: transparent; color: var(--ink-2); border: 1px solid var(--line-strong); }
+.btn-secondary:hover { background: var(--surface-2); color: var(--ink); }
+.hero-note {
+  margin-top: 20px;
+  font-size: 13px; color: var(--ink-4);
+  font-family: var(--font-mono); letter-spacing: 0.02em;
+}
+
+/* --- Features --- */
+.features { max-width: 1100px; margin: 0 auto; padding: 80px 24px; }
+.features h2 {
+  font-family: var(--font-display); font-size: 36px; font-weight: 400;
+  letter-spacing: -0.025em; text-align: center; margin-bottom: 12px;
+}
+.features h2 em { font-style: italic; }
+.features .sub {
+  text-align: center; font-size: 16px; color: var(--ink-3);
+  margin-bottom: 48px; max-width: 500px; margin-left: auto; margin-right: auto;
+}
+.feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.feature-card {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 12px; padding: 28px 24px; transition: all 0.15s;
+}
+.feature-card:hover { border-color: var(--line-strong); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(21,20,15,0.06); }
+.feature-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: var(--surface-2); border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px; font-size: 20px;
+}
+.feature-card h3 { font-family: var(--font-display); font-size: 17px; font-weight: 500; letter-spacing: -0.01em; margin-bottom: 6px; }
+.feature-card p { font-size: 13px; color: var(--ink-3); line-height: 1.55; }
+
+/* --- Screenshot --- */
+.screenshot {
+  max-width: 1100px; margin: 0 auto; padding: 0 24px 80px; text-align: center;
+}
+.screenshot img {
+  width: 100%;
+  height: auto;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  box-shadow: 0 20px 60px rgba(21,20,15,0.12), 0 0 0 1px rgba(21,20,15,0.06);
+  display: block;
+}
+
+/* --- Pricing --- */
+.pricing {
+  background: var(--surface-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  padding: 80px 24px;
+}
+.pricing-inner { max-width: 1000px; margin: 0 auto; }
+.pricing h2 { font-family: var(--font-display); font-size: 36px; font-weight: 400; letter-spacing: -0.025em; text-align: center; margin-bottom: 8px; }
+.pricing h2 em { font-style: italic; }
+.pricing .sub { text-align: center; font-size: 15px; color: var(--ink-3); margin-bottom: 40px; }
+.plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.plan {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 14px; padding: 28px 24px;
+  position: relative; display: flex; flex-direction: column; transition: all 0.15s;
+}
+.plan:hover { border-color: var(--line-strong); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(21,20,15,0.06); }
+.plan.featured { background: linear-gradient(180deg, var(--accent-soft) 0%, var(--surface) 60%); }
+.plan .ribbon {
+  position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+  background: var(--ink); color: var(--bg);
+  font-family: var(--font-mono); font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.07em; padding: 4px 14px; border-radius: 999px;
+}
+.plan .name { font-family: var(--font-display); font-size: 22px; font-weight: 500; letter-spacing: -0.015em; margin-bottom: 4px; }
+.plan .desc { font-size: 13px; color: var(--ink-3); margin-bottom: 18px; min-height: 40px; line-height: 1.5; }
+.plan .price { font-family: var(--font-display); font-size: 32px; font-weight: 500; letter-spacing: -0.025em; margin-bottom: 4px; }
+.plan .price em { font-style: normal; font-size: 14px; color: var(--ink-3); font-weight: 400; margin-left: 4px; }
+.plan .alt { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); margin-bottom: 18px; }
+.plan ul { list-style: none; padding: 0; margin: 0 0 20px; font-size: 13px; color: var(--ink-2); line-height: 1.9; flex: 1; }
+.plan ul li::before { content: "✓ "; color: var(--accent); font-weight: 600; margin-right: 4px; }
+.plan .plan-btn {
+  width: 100%; padding: 10px; border-radius: 8px;
+  background: var(--ink); color: var(--bg); border: 0;
+  font-family: var(--font-body); font-size: 14px; font-weight: 500;
+  cursor: pointer; text-align: center; text-decoration: none; display: block;
+}
+.plan .plan-btn:hover { background: var(--ink-2); }
+.plan .plan-btn.current { background: var(--surface); color: var(--ink-3); border: 1px solid var(--line); cursor: default; }
+.plan .guarantee { font-size: 11px; color: var(--ink-4); text-align: center; margin-top: 10px; font-family: var(--font-mono); }
+
+/* --- Activate --- */
+.activate { max-width: 640px; margin: 0 auto; padding: 80px 24px; }
+.activate h2 { font-family: var(--font-display); font-size: 28px; font-weight: 400; letter-spacing: -0.02em; margin-bottom: 8px; }
+.activate .sub { font-size: 14px; color: var(--ink-3); margin-bottom: 28px; }
+.activate-form {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 12px; padding: 28px;
+}
+.form-field { margin-bottom: 16px; }
+.form-field label {
+  display: block; font-family: var(--font-mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-3); margin-bottom: 6px;
+}
+.form-field input {
+  width: 100%; padding: 10px 14px; border: 1px solid var(--line-strong);
+  border-radius: 8px; font-family: var(--font-body); font-size: 14px;
+  color: var(--ink); background: var(--surface); outline: none;
+}
+.form-field input:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(21,20,15,0.06); }
+.form-field input.mono { font-family: var(--font-mono); letter-spacing: 0.02em; }
+.activate-hint {
+  margin-top: 16px; padding: 14px;
+  background: var(--accent-soft); border: 1px solid var(--accent-line);
+  border-radius: 8px; font-size: 12px; color: var(--accent); line-height: 1.5;
+}
+.activate-hint strong { font-weight: 600; }
+.status-msg { margin-top: 12px; font-size: 13px; padding: 10px 14px; border-radius: 8px; display: none; }
+.status-msg.success { display: block; background: var(--accent-soft); border: 1px solid var(--accent-line); color: var(--accent); }
+.status-msg.error { display: block; background: #FDF2F2; border: 1px solid #E8C0C0; color: var(--danger); }
+
+/* --- How it works --- */
+.how-it-works { max-width: 800px; margin: 0 auto; padding: 0 24px 80px; }
+.how-it-works h2 { font-family: var(--font-display); font-size: 28px; font-weight: 400; letter-spacing: -0.02em; text-align: center; margin-bottom: 32px; }
+.how-it-works h2 em { font-style: italic; }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.step { text-align: center; }
+.step-num {
+  width: 36px; height: 36px; margin: 0 auto 12px;
+  background: var(--ink); color: var(--bg); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 14px; font-weight: 600;
+}
+.step h4 { font-family: var(--font-display); font-size: 16px; font-weight: 500; margin-bottom: 4px; }
+.step p { font-size: 13px; color: var(--ink-3); line-height: 1.5; }
+
+/* --- Privacy --- */
+.privacy-section { max-width: 800px; margin: 0 auto; padding: 80px 24px; text-align: center; }
+.privacy-section h2 { font-family: var(--font-display); font-size: 28px; font-weight: 400; margin-bottom: 12px; }
+.privacy-section h2 em { font-style: italic; }
+.privacy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 28px; text-align: left; }
+.privacy-card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; }
+.privacy-card h4 { font-family: var(--font-display); font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+.privacy-card p { font-size: 12px; color: var(--ink-3); line-height: 1.5; }
+
+/* --- Footer --- */
+.footer { padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); }
+.footer p { font-size: 13px; color: var(--ink-3); margin-bottom: 4px; }
+.footer a { color: var(--accent); text-decoration: none; font-weight: 500; }
+.footer a:hover { text-decoration: underline; }
+.footer .legal { font-family: var(--font-mono); font-size: 10px; color: var(--ink-4); margin-top: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .hero h1 { font-size: 36px; }
+  .feature-grid, .plans, .privacy-grid, .steps { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-brand"><span class="nav-mark">P</span> Pare</a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#activate">Activate Key</a>
+      <a href="#pricing" class="nav-cta">Get Pare</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-mark">P</div>
+  <h1>Reclaim your <em>Mac</em>.</h1>
+  <p>A calmer, privacy-first disk cleanup app for macOS. Scan, decide, clean — and restore anything for 30 days. Nothing ever leaves your Mac.</p>
+  <div class="hero-actions">
+    <a href="#pricing" class="btn btn-primary">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v8M5 7l3 3 3-3M3 13h10"/></svg>
+      Download for Mac
+    </a>
+    <a href="#features" class="btn btn-secondary">See what it does</a>
+  </div>
+  <p class="hero-note">macOS 13+ · Apple Silicon & Intel · Free to use (500 MB/mo cap)</p>
+</section>
+
+<!-- Screenshot -->
+<section class="screenshot">
+  <img src="screenshot.png" alt="Pare dashboard showing 453 GB used, storage breakdown, trend chart, and recommended cleanups" width="2842" height="1800" loading="eager">
+</section>
+
+<!-- How it works -->
+<section class="how-it-works">
+  <h2>How it <em>works</em></h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h4>Download free</h4>
+      <p>Pare is free to use with a 500 MB monthly cap. No account required. Just download and open.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h4>Buy a licence key</h4>
+      <p>When you're ready for unlimited cleanup, purchase a key. Payment is handled securely by LemonSqueezy.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h4>Activate in the app</h4>
+      <p>Paste your licence key in Pare → Settings → Licence → Activate. Premium unlocks instantly.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="features" id="features">
+  <h2>Everything your Mac <em>needs</em></h2>
+  <p class="sub">8 cleanup categories, one reversible workflow. All on-device.</p>
+  <div class="feature-grid">
+    <div class="feature-card"><div class="feature-icon">🧹</div><h3>System Junk</h3><p>Caches, logs, and language files that macOS regenerates on demand. Protected system paths excluded automatically.</p></div>
+    <div class="feature-card"><div class="feature-icon">📦</div><h3>Uninstaller</h3><p>Remove apps with all their preferences, caches, and support files. Surfaces leftovers from deleted apps.</p></div>
+    <div class="feature-card"><div class="feature-icon">👯</div><h3>Duplicates</h3><p>Find duplicate files across Downloads, Documents, and Desktop. Pare keeps the best copy automatically.</p></div>
+    <div class="feature-card"><div class="feature-icon">🗂️</div><h3>Large & Old Files</h3><p>Files over 100 MB unopened in 6+ months. You decide what to keep — nothing is pre-selected.</p></div>
+    <div class="feature-card"><div class="feature-icon">🛠️</div><h3>Developer Junk</h3><p>Xcode DerivedData, unused simulators, node_modules, and build caches. The biggest single reclaim category.</p></div>
+    <div class="feature-card"><div class="feature-icon">✉️</div><h3>Mail Cleanup</h3><p>Apple Mail keeps attachments on disk forever. Safe to remove — Mail re-downloads on demand.</p></div>
+    <div class="feature-card"><div class="feature-icon">📸</div><h3>Photos</h3><p>Screenshots, RAW originals, burst near-duplicates, and Photos library cache.</p></div>
+    <div class="feature-card"><div class="feature-icon">🗺️</div><h3>Space Lens</h3><p>A visual treemap of what's taking up your disk. Click any block to drill into that category.</p></div>
+    <div class="feature-card"><div class="feature-icon">🔄</div><h3>Recovery Bin</h3><p>Everything goes to a 30-day Recovery Bin first. Restore with one click. Nothing is permanent.</p></div>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section class="pricing" id="pricing">
+  <div class="pricing-inner">
+    <h2>Simple, <em>honest</em> pricing</h2>
+    <p class="sub">Start free. Upgrade when you need to. No account required.</p>
+    <div class="plans">
+      <!-- Free -->
+      <div class="plan">
+        <div class="name">Free</div>
+        <div class="desc">Try Pare without committing. Great for occasional cleanups.</div>
+        <div class="price">$0<em>/ month</em></div>
+        <div class="alt">No payment method required</div>
+        <ul>
+          <li>500 MB monthly reclamation cap</li>
+          <li>All 8 cleanup categories</li>
+          <li>30-day Recovery Bin</li>
+          <li>1 Mac</li>
+        </ul>
+        <span class="plan-btn current">Download free</span>
+      </div>
+
+      <!-- Premium — LemonSqueezy checkout -->
+      <div class="plan featured">
+        <div class="ribbon">Best value</div>
+        <div class="name">Premium</div>
+        <div class="desc">For developers, creators, and anyone with a Mac that's always full.</div>
+        <div class="price">$14.99<em>/ year</em></div>
+        <div class="alt">≈ ₦9,500 or £11.99 · billed annually</div>
+        <ul>
+          <li>Unlimited reclamation</li>
+          <li>Deep simulator + Xcode cleanup</li>
+          <li>Scheduled background scans</li>
+          <li>Cleanup reports (PDF/CSV)</li>
+          <li>1 Mac · upgradeable to Family</li>
+        </ul>
+        <a href="https://getpare.lemonsqueezy.com/checkout/buy/345a7489-0844-4525-8c53-0300c974a41c"
+           class="plan-btn lemonsqueezy-button">
+          Get Premium — $14.99/yr
+        </a>
+        <div class="guarantee">30-day money-back guarantee</div>
+      </div>
+
+      <!-- Family — LemonSqueezy checkout -->
+      <div class="plan">
+        <div class="name">Family</div>
+        <div class="desc">For households, partners, and small teams sharing devices.</div>
+        <div class="price">$29.99<em>/ year</em></div>
+        <div class="alt">≈ ₦18,500 or £23.99 · billed annually</div>
+        <ul>
+          <li>Everything in Premium</li>
+          <li>Up to 3 Macs on one licence</li>
+          <li>Shared family billing</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="https://getpare.lemonsqueezy.com/checkout/buy/1f275834-c8fd-483b-9468-4f612f14bb39"
+           class="plan-btn lemonsqueezy-button">
+          Get Family — $29.99/yr
+        </a>
+        <div class="guarantee">30-day money-back guarantee</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Activate licence key -->
+<section class="activate" id="activate">
+  <h2>Already have a <em>key</em>?</h2>
+  <p class="sub">After purchasing, you'll receive a licence key by email. Activate it in the Pare app.</p>
+
+  <div class="activate-form">
+    <div class="activate-hint">
+      <strong>How to activate:</strong> Open Pare → Settings → Licence tab → paste your email and key → click Activate. Premium unlocks instantly on this Mac.
+    </div>
+
+    <h3 style="font-family: var(--font-display); font-size: 16px; font-weight: 500; margin: 24px 0 16px;">Test activation (demo)</h3>
+    <div class="form-field">
+      <label for="testEmail">Email</label>
+      <input type="email" id="testEmail" placeholder="you@example.com">
+    </div>
+    <div class="form-field">
+      <label for="testKey">Generate a test key</label>
+      <input type="text" id="testKey" class="mono" placeholder="Click Generate to create a test key" readonly>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button class="btn btn-primary" onclick="generateTestKey()" style="flex: 1; justify-content: center;">Generate Test Key</button>
+      <button class="btn btn-secondary" onclick="copyTestKey()" style="justify-content: center;" id="copyBtn">Copy</button>
+    </div>
+    <div class="status-msg" id="statusMsg"></div>
+
+    <p style="font-size: 12px; color: var(--ink-4); margin-top: 16px; font-family: var(--font-mono);">
+      Test keys work in the app. For production, keys are issued automatically after purchase via LemonSqueezy.
+    </p>
+  </div>
+</section>
+
+<!-- Privacy -->
+<section class="privacy-section" id="privacy">
+  <h2>Privacy <em>first</em></h2>
+  <p style="color: var(--ink-3); margin-bottom: 8px;">Pare runs entirely on your Mac. Nothing scanned ever leaves your device.</p>
+  <div class="privacy-grid">
+    <div class="privacy-card"><h4>100% on-device</h4><p>No cloud, no telemetry by default. File names, paths, and contents never leave your Mac.</p></div>
+    <div class="privacy-card"><h4>You approve every deletion</h4><p>Pare previews exactly what's selected. Nothing moves without your explicit confirmation.</p></div>
+    <div class="privacy-card"><h4>30-day Recovery Bin</h4><p>Everything goes to a local Recovery Bin first. Restore with one click for 30 days.</p></div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <p>Made by <a href="#">ClearPath Digital</a> · Pare v1.0</p>
+  <p><a href="#">Terms of Use</a> · <a href="#">Privacy Policy</a> · <a href="mailto:support@pare.app">Support</a></p>
+  <p class="legal">NDPA 2023 · GDPR compliant · On-device processing · Opt-in telemetry · Payments via LemonSqueezy</p>
+</footer>
+
+<script>
+// Test key generator (for demo — production keys come from LemonSqueezy)
+function generateTestKey() {
+  const email = document.getElementById('testEmail').value.trim();
+  if (!email) { alert('Enter your email first.'); return; }
+  const input = email.toLowerCase() + ':PRO';
+  let hash = 0;
+  for (let i = 0; i < input.length; i++) {
+    hash = ((hash << 5) - hash) + input.charCodeAt(i);
+    hash = hash & hash;
+  }
+  const hex = Math.abs(hash).toString(16).toUpperCase().padStart(15, 'A');
+  const key = 'PARE-DEMO-' + hex.substring(0,5) + '-' + hex.substring(5,10) + '-' + hex.substring(10,15);
+  document.getElementById('testKey').value = key;
+
+  const msg = document.getElementById('statusMsg');
+  msg.className = 'status-msg success';
+  msg.textContent = '✓ Test key generated! Copy it and paste in Pare → Settings → Licence → Activate.';
+}
+
+function copyTestKey() {
+  const key = document.getElementById('testKey').value;
+  if (!key) return;
+  navigator.clipboard.writeText(key).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+</script>
+
+</body>
+</html>

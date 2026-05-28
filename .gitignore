@@ -77,3 +77,7 @@ Icon?
 
 # === Sparkle appcast staging ===
 appcast.xml.unsigned
+
+# Secrets
+.env*
+*.env

@@ -1,0 +1,71 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug: App (Pare)",
+      "program": "${workspaceFolder}/.build/debug/Pare",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "swift: Build All"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug: Helper (ParePrivilegedHelper)",
+      "program": "${workspaceFolder}/.build/debug/ParePrivilegedHelper",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "swift: Build All"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Tests: PareKit",
+      "program": "${workspaceFolder}/.build/debug/PareKitPackageTests.xctest/Contents/MacOS/PareKitPackageTests",
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:getpare}",
+      "name": "Debug Pare",
+      "target": "Pare",
+      "configuration": "debug",
+      "preLaunchTask": "swift: Build Debug Pare"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:getpare}",
+      "name": "Release Pare",
+      "target": "Pare",
+      "configuration": "release",
+      "preLaunchTask": "swift: Build Release Pare"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:getpare}",
+      "name": "Debug ParePrivilegedHelper",
+      "target": "ParePrivilegedHelper",
+      "configuration": "debug",
+      "preLaunchTask": "swift: Build Debug ParePrivilegedHelper"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:getpare}",
+      "name": "Release ParePrivilegedHelper",
+      "target": "ParePrivilegedHelper",
+      "configuration": "release",
+      "preLaunchTask": "swift: Build Release ParePrivilegedHelper"
+    }
+  ]
+}

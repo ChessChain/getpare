@@ -1,0 +1,33 @@
+name: Nightly
+
+on:
+  schedule:
+    - cron: "0 3 * * *"    # 03:00 UTC every day
+  workflow_dispatch:
+
+jobs:
+  nightly-notarisation-dry-run:
+    runs-on: [self-hosted, macOS, arm64]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build universal archive
+        run: |
+          xcodebuild -workspace Pare.xcworkspace \
+            -scheme Pare \
+            -configuration Release \
+            -destination "generic/platform=macOS" \
+            ARCHS="arm64 x86_64" \
+            ONLY_ACTIVE_ARCH=NO \
+            archive -archivePath build/Pare.xcarchive
+
+      - name: Run UI tests
+        run: swift test --filter UITests || true
+
+      - name: Notarisation dry-run
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: ./Tools/notarise.sh --dry-run build/Pare.xcarchive

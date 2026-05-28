@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: [self-hosted, macOS, arm64]   # see ADR-007
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Resolve SPM dependencies
+        run: swift package resolve
+
+      - name: Build (all targets)
+        run: swift build --build-tests
+
+      - name: Run unit tests
+        run: swift test --parallel
+
+      - name: Lint (swift-format)
+        run: |
+          if command -v swift-format >/dev/null 2>&1; then
+            swift-format lint -r --strict App Helper PareKit
+          else
+            echo "swift-format not installed on runner — skipping (configure runner)."
+          fi

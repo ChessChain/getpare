@@ -1,0 +1,18 @@
+# Pare — swift-format configuration
+
+--swiftversion 5.10
+--indent 4
+--maxwidth 110
+--commas inline
+--trimwhitespace always
+--semicolons never
+--header strip
+--wraparguments before-first
+--wrapparameters before-first
+--wrapcollections before-first
+--closingparen balanced
+--ifdef no-indent
+--self remove
+--patternlet hoist
+--ranges spaced
+--operatorfunc spaced

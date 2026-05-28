@@ -1,0 +1,14 @@
+/* App/Sources/Resources/Localizable.strings
+   v1.0 ships English-only (BRD NFR-11). Locale packs land in v1.1. */
+
+"app.name" = "Pare";
+"action.run_smart_scan" = "Run Smart Scan";
+"action.move_to_recovery_bin" = "Move to Recovery Bin";
+"action.back_to_dashboard" = "Back to Dashboard";
+
+"empty.recovery_bin" = "Nothing here yet — anything Pare removes can be restored for 30 days.";
+"empty.dashboard_prescan" = "Run your first scan to see what's taking up space.";
+
+"privacy.assurance" = "Nothing leaves your Mac.";
+
+"permission.fda.title" = "Pare needs Full Disk Access to scan your library.";

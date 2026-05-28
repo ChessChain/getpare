@@ -1,0 +1,34 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "swift: Build All",
+      "type": "shell",
+      "command": "swift",
+      "args": ["build"],
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": ["$swiftc"]
+    },
+    {
+      "label": "swift: Test All",
+      "type": "shell",
+      "command": "swift",
+      "args": ["test", "--parallel"],
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": ["$swiftc"]
+    },
+    {
+      "label": "swift: Resolve packages",
+      "type": "shell",
+      "command": "swift",
+      "args": ["package", "resolve"]
+    },
+    {
+      "label": "swift-format: Lint",
+      "type": "shell",
+      "command": "swift-format",
+      "args": ["lint", "-r", "--strict", "App", "Helper", "PareKit"],
+      "problemMatcher": []
+    }
+  ]
+}

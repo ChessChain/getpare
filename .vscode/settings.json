@@ -1,0 +1,70 @@
+{
+  "swift.buildArguments": [
+    "-Xswiftc",
+    "-warnings-as-errors"
+  ],
+  "swift.diagnosticsCollection": "onlyExplicit",
+  "editor.formatOnSave": true,
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true,
+  "editor.rulers": [
+    110
+  ],
+  "[swift]": {
+    "editor.defaultFormatter": "vknabel.vscode-apple-swift-format",
+    "editor.formatOnSave": true,
+    "editor.semanticHighlighting.enabled": true
+  },
+  "[markdown]": {
+    "editor.wordWrap": "on",
+    "editor.rulers": [],
+    "files.trimTrailingWhitespace": false
+  },
+  "[yaml]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "files.exclude": {
+    "**/.build": true,
+    "**/.swiftpm": true,
+    "**/DerivedData": true,
+    "**/.DS_Store": true,
+    "**/*.xcodeproj": false,
+    "**/xcuserdata": true
+  },
+  "search.exclude": {
+    "**/.build": true,
+    "**/.swiftpm": true,
+    "**/DerivedData": true,
+    "**/Pods": true,
+    "**/build": true,
+    "**/dist": true
+  },
+  "files.associations": {
+    "Package.swift": "swift",
+    "*.entitlements": "xml",
+    "*.plist": "xml"
+  },
+  "cSpell.words": [
+    "ClearPath",
+    "Coordinators",
+    "ContentHash",
+    "Jumoke",
+    "NDPA",
+    "Naira",
+    "Notarisation",
+    "Notarised",
+    "Paystack",
+    "Pare",
+    "SMAppService",
+    "Sparkle",
+    "SwiftUI",
+    "swiftui",
+    "GRDB",
+    "BLAKE",
+    "Notarise",
+    "appcast",
+    "iyawo",
+    "Verve"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "sswg.swift-lang",
+    "vadimcn.vscode-lldb",
+    "vknabel.vscode-apple-swift-format",
+    "redhat.vscode-yaml",
+    "github.vscode-github-actions",
+    "yzhang.markdown-all-in-one",
+    "streetsidesoftware.code-spell-checker",
+    "eamodio.gitlens"
+  ]
+}
