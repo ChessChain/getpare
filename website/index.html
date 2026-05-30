@@ -195,6 +195,8 @@ body {
 }
 .plan .plan-btn:hover { background: var(--ink-2); }
 .plan .plan-btn.current { background: var(--surface); color: var(--ink-3); border: 1px solid var(--line); cursor: default; }
+.plan .plan-btn.download { background: var(--accent); color: #fff; cursor: pointer; border: 0; }
+.plan .plan-btn.download:hover { background: #14724a; }
 .plan .guarantee { font-size: 11px; color: var(--ink-4); text-align: center; margin-top: 10px; font-family: var(--font-mono); }
 
 /* --- Activate --- */
@@ -359,7 +361,10 @@ body {
           <li>30-day Recovery Bin</li>
           <li>1 Mac</li>
         </ul>
-        <a href="Pare-1.0.0.dmg" download class="plan-btn" style="text-decoration:none; text-align:center;">Download Free</a>
+        <a href="Pare-1.0.0.dmg" download class="plan-btn download" style="text-decoration:none; display:flex; align-items:center; justify-content:center; gap:8px;">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v8M5 7l3 3 3-3M3 13h10"/></svg>
+          Download Free (2.2 MB)
+        </a>
       </div>
 
       <!-- Premium — LemonSqueezy checkout -->
