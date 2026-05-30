@@ -22,17 +22,21 @@ public actor ScannerOrchestrator {
 
     public func startScan(options: ScanOptions) throws -> ScanHandle {
         let handle = ScanHandle()
-        let scanners: [Scanner] = options.categories.sorted(by: { $0.rawValue < $1.rawValue }).map { c in
-            switch c {
-            case .systemJunk:    return SystemJunkScanner()
-            case .duplicate:     return DuplicateScanner()
-            case .largeFile:     return LargeFileScanner()
-            case .uninstaller:   return UninstallerScanner()
-            case .mailCache:     return MailScanner()
-            case .developerJunk: return DeveloperScanner()
-            default:             return SystemJunkScanner() // TODO: downloads/photos/startup
+        let scanners: [Scanner] = options.categories
+            .sorted(by: { $0.rawValue < $1.rawValue })
+            .compactMap { c -> Scanner? in
+                switch c {
+                case .systemJunk:    return SystemJunkScanner()
+                case .duplicate:     return DuplicateScanner()
+                case .largeFile:     return LargeFileScanner()
+                case .uninstaller:   return UninstallerScanner()
+                case .mailCache:     return MailScanner()
+                case .developerJunk: return DeveloperScanner()
+                case .downloads, .photoLibrary, .startupItem:
+                    // Not yet implemented — silently skip rather than mis-categorising.
+                    return nil
+                }
             }
-        }
 
         let log = log
         let task = Task<[ScanItem], Error> {
@@ -88,5 +92,37 @@ public actor ScannerOrchestrator {
 
     public func results(for handle: ScanHandle) -> [ScanItem] {
         activeScans[handle]?.results ?? []
+    }
+
+    /// Locate a single scan item across every active scan. Used by
+    /// `DeletionEngine` to map UUIDs received over XPC back to a concrete
+    /// `ScanItem` plus the originating handle (which becomes the
+    /// `RecoveryItem.scanID` for grouping in the Recovery Bin).
+    public func findItem(byID id: UUID) -> (item: ScanItem, handle: ScanHandle)? {
+        for (handle, run) in activeScans {
+            if let item = run.results.first(where: { $0.id == id }) {
+                return (item, handle)
+            }
+        }
+        return nil
+    }
+
+    /// Test-only seam: pre-populates the orchestrator with results so
+    /// `DeletionEngine` tests can exercise the lookup path without spinning
+    /// up real scanners. Not part of the public XPC surface.
+    internal func seedForTesting(handle: ScanHandle, results: [ScanItem]) {
+        let task = Task<[ScanItem], Error> { results }
+        activeScans[handle] = ScanRun(
+            task: task,
+            progress: ScanProgress(
+                percent: 1.0,
+                currentTask: "",
+                currentPath: "",
+                filesScanned: results.count,
+                bytesFoundSoFar: results.reduce(0) { $0 + $1.bytes },
+                estimatedSecondsLeft: 0
+            ),
+            results: results
+        )
     }
 }

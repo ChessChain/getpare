@@ -7,11 +7,37 @@ set -euo pipefail
 
 ARCHIVE="${1:?Usage: sign-helper.sh <Pare.xcarchive>}"
 TEAM_ID="${APPLE_TEAM_ID:?APPLE_TEAM_ID must be set}"
-APP_PATH="$ARCHIVE/Products/Applications/Pare.app"
-HELPER="$APP_PATH/Contents/Library/LaunchServices/com.clearpath.pare.helper"
-APP_ENT="App/Sources/Pare.entitlements"
-HELPER_ENT="Helper/Sources/Helper.entitlements"
+IDENTITY="Developer ID Application: ClearPath Digital ($TEAM_ID)"
 
-# TODO: codesign the helper, then the framework bundles, then the .app.
-echo "TODO: codesign --force --options runtime --timestamp --sign \"Developer ID Application: ClearPath Digital ($TEAM_ID)\" --entitlements \"$HELPER_ENT\" \"$HELPER\""
-echo "TODO: codesign --force --options runtime --timestamp --sign \"Developer ID Application: ClearPath Digital ($TEAM_ID)\" --entitlements \"$APP_ENT\" \"$APP_PATH\""
+APP_PATH="$ARCHIVE/Products/Applications/Pare.app"
+HELPER_BIN="$APP_PATH/Contents/MacOS/com.clearpath.pare.helper"
+HELPER_PLIST="$APP_PATH/Contents/Library/LaunchDaemons/com.clearpath.pare.helper.plist"
+
+APP_ENT="App/Pare.entitlements"
+HELPER_ENT="Helper/Helper.entitlements"
+
+for f in "$HELPER_BIN" "$HELPER_PLIST" "$APP_ENT" "$HELPER_ENT"; do
+    if [ ! -e "$f" ]; then
+        echo "missing required artefact: $f" >&2
+        exit 1
+    fi
+done
+
+echo "Signing helper binary…"
+codesign --force --options runtime --timestamp \
+    --sign "$IDENTITY" \
+    --entitlements "$HELPER_ENT" \
+    "$HELPER_BIN"
+
+echo "Signing app bundle…"
+codesign --force --options runtime --timestamp \
+    --sign "$IDENTITY" \
+    --entitlements "$APP_ENT" \
+    "$APP_PATH"
+
+echo "Verifying…"
+codesign --verify --deep --strict --verbose=2 "$APP_PATH"
+codesign --display --entitlements - "$HELPER_BIN" >/dev/null
+codesign --display --entitlements - "$APP_PATH" >/dev/null
+
+echo "Done."

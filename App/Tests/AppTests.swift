@@ -12,10 +12,15 @@ final class AppTests: XCTestCase {
         XCTAssertEqual(c.route, .dashboard)
     }
 
-    func testCoordinatorStartScanSwitchesRoute() {
+    func testCoordinatorStartScanPostsNotification() {
         let c = AppCoordinator()
+        let exp = expectation(forNotification: .init("PareSmartScanRequested"), object: nil)
         c.startScan()
-        XCTAssertEqual(c.route, .scan)
+        wait(for: [exp], timeout: 1.0)
+        // Smart Scan intentionally does not change the route — it broadcasts a
+        // notification that the dashboard's view models listen for, and the
+        // scan runs inline on whatever screen is open.
+        XCTAssertEqual(c.route, .dashboard)
     }
 
     func testSystemStorageProviderReturnsNonZeroCapacity() {

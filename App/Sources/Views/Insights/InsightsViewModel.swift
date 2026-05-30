@@ -72,12 +72,10 @@ public final class InsightsViewModel: ObservableObject {
 
     public init() {
         // Volume stats — instant
-        var totalGB = 460.0
         var usedGB = 455.0
         if let attrs = try? FileManager.default.attributesOfFileSystem(forPath: "/") {
             let total = (attrs[.systemSize] as? Int64) ?? 0
             let free  = (attrs[.systemFreeSize] as? Int64) ?? 0
-            totalGB = Double(total) / 1_073_741_824.0
             usedGB = Double(total - free) / 1_073_741_824.0
         }
 

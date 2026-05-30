@@ -25,7 +25,8 @@ let package = Package(
         // ── Shared models, XPC contract, utilities ──────────────────────
         .target(
             name: "PareKit",
-            path: "PareKit/Sources"
+            path: "PareKit/Sources",
+            swiftSettings: strictWarnings
         ),
         .testTarget(
             name: "PareKitTests",
@@ -40,13 +41,15 @@ let package = Package(
                 "PareKit",
                 .product(name: "GRDB", package: "GRDB.swift")
             ],
-            path: "Helper/Sources"
+            path: "Helper/Sources",
+            swiftSettings: strictWarnings
         ),
         // ── Privileged helper executable (thin @main entry point) ──────
         .executableTarget(
             name: "Helper",
             dependencies: ["HelperLib", "PareKit"],
-            path: "Helper/EntryPoint"
+            path: "Helper/EntryPoint",
+            swiftSettings: strictWarnings
         ),
         .testTarget(
             name: "HelperTests",
@@ -58,13 +61,19 @@ let package = Package(
         .target(
             name: "AppLib",
             dependencies: ["PareKit"],
-            path: "App/Sources"
+            path: "App/Sources",
+            resources: [
+                .process("Resources/Assets.xcassets"),
+                .process("Resources/Localizable.strings"),
+            ],
+            swiftSettings: strictWarnings
         ),
         // ── SwiftUI app executable (thin @main entry point) ───────────
         .executableTarget(
             name: "App",
             dependencies: ["AppLib", "PareKit"],
-            path: "App/EntryPoint"
+            path: "App/EntryPoint",
+            swiftSettings: strictWarnings
         ),
         .testTarget(
             name: "AppTests",
@@ -73,3 +82,9 @@ let package = Package(
         )
     ]
 )
+
+/// Treat warnings as errors in our own targets so CI catches regressions.
+/// Excluded from test targets, where transient warnings are acceptable.
+private let strictWarnings: [SwiftSetting] = [
+    .unsafeFlags(["-warnings-as-errors"])
+]

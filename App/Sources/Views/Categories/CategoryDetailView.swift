@@ -54,6 +54,12 @@ struct CategoryDetailView: View {
                     .padding(.bottom, 20)
                     Divider().padding(.bottom, 22)
 
+                    // ── Limited-mode banner ──────────────────────
+                    if vm.isLimitedMode {
+                        limitedModeBanner
+                            .padding(.bottom, 14)
+                    }
+
                     // ── Scan progress ────────────────────────────
                     if vm.isLoading {
                         scanProgressView
@@ -239,6 +245,32 @@ struct CategoryDetailView: View {
     }
 
     // MARK: - Scan Progress
+
+    private var limitedModeBanner: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "exclamationmark.shield")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(PareColor.warning)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Limited mode")
+                    .font(PareFont.body(13, weight: .medium))
+                    .foregroundStyle(PareColor.ink)
+                Text("Pare's privileged helper isn't installed. Results may be incomplete for TCC-protected paths.")
+                    .font(PareFont.body(12))
+                    .foregroundStyle(PareColor.ink3)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(PareColor.warningSoft)
+        .clipShape(RoundedRectangle(cornerRadius: PareRadius.standard))
+        .overlay(
+            RoundedRectangle(cornerRadius: PareRadius.standard)
+                .stroke(PareColor.warning.opacity(0.4), lineWidth: 1)
+        )
+    }
 
     private var scanProgressView: some View {
         VStack(alignment: .leading, spacing: 6) {

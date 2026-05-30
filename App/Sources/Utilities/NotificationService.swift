@@ -13,9 +13,15 @@ public final class NotificationService {
     public static let shared = NotificationService()
 
     private var cancellables = Set<AnyCancellable>()
-    private let center = UNUserNotificationCenter.current()
+    /// Nil when the process has no main bundle (e.g. `swift run` for dev).
+    /// `UNUserNotificationCenter.current()` aborts in that case.
+    private let center: UNUserNotificationCenter? = {
+        guard Bundle.main.bundleIdentifier != nil else { return nil }
+        return UNUserNotificationCenter.current()
+    }()
 
     private init() {
+        guard center != nil else { return }
         requestPermission()
         setupMonitors()
     }
@@ -23,7 +29,7 @@ public final class NotificationService {
     // MARK: - Permission
 
     private func requestPermission() {
-        center.requestAuthorization(options: [.alert, .sound, .badge]) { _, _ in }
+        center?.requestAuthorization(options: [.alert, .sound, .badge]) { _, _ in }
     }
 
     // MARK: - Monitors
@@ -101,6 +107,8 @@ public final class NotificationService {
     // MARK: - Send
 
     private func send(id: String, title: String, body: String, category: String) {
+        guard let center = center else { return }
+
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body

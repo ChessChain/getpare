@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+    Entitlements for the Pare app (sandboxed UI).
+
+    NOTE: ADR-0001 mandates a sandboxed UI that talks to the privileged
+    helper for every filesystem read/write. Today's code reads directories
+    directly via SystemStorageProvider / CleanedItemStore, so enabling
+    `com.apple.security.app-sandbox = true` will break the working v1.0
+    until the App is fully routed through PareHelperClient. Flip the flag
+    once that migration is done.
+
+    `com.apple.security.temporary-exception.mach-lookup.global-name` lets
+    the sandboxed UI find the helper's mach service. This is required even
+    though both binaries share a team ID, because of sandbox lookup rules.
+-->
+<plist version="1.0">
+<dict>
+    <key>com.apple.security.app-sandbox</key>
+    <false/>
+
+    <key>com.apple.security.files.user-selected.read-write</key>
+    <true/>
+
+    <key>com.apple.security.network.client</key>
+    <true/>
+
+    <key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
+    <array>
+        <string>com.clearpath.pare.helper</string>
+    </array>
+</dict>
+</plist>

@@ -129,8 +129,6 @@ public enum SystemStorageProvider {
         let home = fm.homeDirectoryForCurrentUser
 
         let downloads = directorySize(home.appendingPathComponent("Downloads"))
-        let documents = directorySize(home.appendingPathComponent("Documents"))
-        let movies = directorySize(home.appendingPathComponent("Movies"))
 
         // Large files: count files > 100 MB in Downloads, Documents, Movies
         var largeFilesTotal: Int64 = 0

@@ -2,6 +2,7 @@
 
 import Foundation
 import SwiftUI
+import PareKit
 
 struct CategoryItem: Identifiable {
     let id: String
@@ -47,6 +48,11 @@ final class CategoryDetailViewModel: ObservableObject {
     @Published var showPaywall = false
     @Published var cleanedCount = 0
     @Published var cleanedSize: Int64 = 0
+
+    /// True when scanning is running directly in the App rather than via the
+    /// privileged helper — i.e. no FDA, limited visibility into TCC-protected
+    /// paths. UI surfaces a small banner so the user knows.
+    @Published var isLimitedMode: Bool = false
 
     var filters: [String] { category.filters }
 
@@ -154,6 +160,87 @@ final class CategoryDetailViewModel: ObservableObject {
     // MARK: - Load real items
 
     private func loadItems() {
+        if let helperCategory = Self.helperCategory(for: category) {
+            Task { @MainActor in
+                let handled = await self.loadViaHelper(helperCategory: helperCategory)
+                if !handled {
+                    self.isLimitedMode = true
+                    self.loadItemsLocally()
+                }
+            }
+            return
+        }
+        // Categories without a helper-side scanner stay on the direct-FS path.
+        isLimitedMode = true
+        loadItemsLocally()
+    }
+
+    /// Returns the helper-side category that backs a UI category, or nil if
+    /// no helper scanner exists yet (in which case we use the local walker).
+    private static func helperCategory(for category: CategoryType) -> PareKit.Category? {
+        switch category {
+        case .largeFiles:    return .largeFile
+        case .systemJunk:    return .systemJunk
+        case .duplicates:    return .duplicate
+        case .mailCleanup:   return .mailCache
+        case .developerJunk: return .developerJunk
+        default:             return nil
+        }
+    }
+
+    /// Try the helper for this view's category. Returns false when the
+    /// helper is unavailable or errored — caller must fall back to local.
+    @MainActor
+    private func loadViaHelper(helperCategory: PareKit.Category) async -> Bool {
+        let cat = category
+        let vm = self
+        let scanItems = await HelperScanRoute.fetch(categories: [helperCategory]) { progress in
+            Task { @MainActor in
+                vm.scanTask = progress.currentTask
+                vm.scanProgress = progress.percent
+            }
+        }
+        guard let scanItems = scanItems else { return false }
+
+        let home = FileManager.default.homeDirectoryForCurrentUser.path
+        let mapped: [CategoryItem] = scanItems.map { item in
+            let path = item.path.path
+            let shortPath = path.replacingOccurrences(of: home, with: "~")
+            let ext = item.path.pathExtension.lowercased()
+            let isDeletable = FileManager.default.isDeletableFile(atPath: path)
+            return CategoryItem(
+                id: path,
+                name: item.path.lastPathComponent,
+                detail: shortPath,
+                thumbLabel: Self.thumbLabel(ext),
+                typeLabel: Self.typeLabel(ext, category: cat),
+                filterTag: Self.filterTag(ext, path: shortPath, category: cat),
+                lastTouched: Self.relativeDate(item.lastModified),
+                sizeLabel: Self.fmt(item.bytes),
+                bytes: item.bytes,
+                isSelected: false,
+                isProtected: !isDeletable,
+                url: item.path
+            )
+        }
+        .sorted { $0.bytes > $1.bytes }
+
+        let display = Array(mapped.prefix(200))
+        allItems = display
+        items = display
+        summaryCards = Self.buildSummary(
+            cat,
+            items: mapped,
+            totalBytes: mapped.reduce(0) { $0 + $1.bytes }
+        )
+        scanProgress = 1.0
+        scanTask = "Complete (via helper)"
+        isLoading = false
+        isLimitedMode = false
+        return true
+    }
+
+    private func loadItemsLocally() {
         let cat = category
         let home = FileManager.default.homeDirectoryForCurrentUser
         let vm = self
@@ -346,7 +433,6 @@ final class CategoryDetailViewModel: ObservableObject {
         case .duplicates:
             let photos = items.filter { $0.filterTag == "Photos" }
             let docs = items.filter { $0.filterTag == "Documents" }
-            let audio = items.filter { $0.filterTag == "Audio" }
             return [
                 .init(id: "files", label: "Files Scanned",   value: "\(count)",       isAccent: false),
                 .init(id: "size",  label: "Potential Dupes",  value: fmt(totalBytes),  isAccent: true),

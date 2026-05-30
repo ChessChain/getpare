@@ -14,7 +14,14 @@ public final class XPCService: NSObject, NSXPCListenerDelegate {
     private let recoveryStore = RecoveryStore()
 
     public func listener(_ listener: NSXPCListener, shouldAcceptNewConnection conn: NSXPCConnection) -> Bool {
-        // Validate the connecting client's code signature.
+        guard PareSigning.isConfigured else {
+            log.error(
+                "Rejecting XPC connection pid=\(conn.processIdentifier): "
+                + "PareSigning.expectedTeamID is still the placeholder. "
+                + "Set it in PareKit/IPC/PareSigning.swift before running a signed build."
+            )
+            return false
+        }
         guard Self.validateClientSignature(conn) else {
             log.error("Rejected XPC connection pid=\(conn.processIdentifier): code signature validation failed")
             return false
@@ -29,7 +36,7 @@ public final class XPCService: NSObject, NSXPCListenerDelegate {
         return true
     }
 
-    /// Verifies the connecting process was signed by the same team as the helper.
+    /// Verifies the connecting process was signed by the team in `PareSigning`.
     private static func validateClientSignature(_ conn: NSXPCConnection) -> Bool {
         var code: SecCode?
         let pid = conn.processIdentifier
@@ -40,11 +47,10 @@ public final class XPCService: NSObject, NSXPCListenerDelegate {
             return false
         }
 
-        // Build a requirement that the client shares our team identifier.
-        // TODO: replace TEAMID with the real Apple Developer Team ID.
-        let requirementString = "anchor apple generic and certificate leaf[subject.OU] = \"TEAMID\""
         var requirement: SecRequirement?
-        guard SecRequirementCreateWithString(requirementString as CFString, [], &requirement) == errSecSuccess,
+        guard SecRequirementCreateWithString(
+                PareSigning.codeSigningRequirement as CFString, [], &requirement
+              ) == errSecSuccess,
               let req = requirement else {
             return false
         }

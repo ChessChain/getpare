@@ -13,6 +13,11 @@ public struct CleanupReport: Codable, Sendable {
     public struct SkippedItem: Codable, Sendable {
         public let path: URL
         public let reason: String
+
+        public init(path: URL, reason: String) {
+            self.path = path
+            self.reason = reason
+        }
     }
 
     public init(movedCount: Int, bytesReclaimed: Int64, skipped: [SkippedItem], scanID: UUID) {
@@ -31,6 +36,12 @@ public struct RestoreReport: Codable, Sendable {
         public let originalPath: URL
         public let resolvedPath: URL  // e.g. file (restored).ext
         public let reason: String
+
+        public init(originalPath: URL, resolvedPath: URL, reason: String) {
+            self.originalPath = originalPath
+            self.resolvedPath = resolvedPath
+            self.reason = reason
+        }
     }
 
     public init(restoredCount: Int, conflicts: [Conflict]) {

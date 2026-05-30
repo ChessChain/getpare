@@ -77,6 +77,7 @@ public final class AppCoordinator: ObservableObject {
             onboardingStep = .splash
         }
         permissionManager.hasFullDiskAccess = PermissionManager.checkFDA()
+        HelperInstaller.shared.registerIfNeeded()
     }
 
     // MARK: - Navigation

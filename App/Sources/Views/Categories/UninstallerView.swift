@@ -35,6 +35,34 @@ struct UninstallerView: View {
                         .padding(.bottom, 20)
                         Divider().padding(.bottom, 22)
 
+                        // Limited-mode banner — shown when running without the helper.
+                        if vm.isLimitedMode {
+                            HStack(spacing: 10) {
+                                Image(systemName: "exclamationmark.shield")
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundStyle(PareColor.warning)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Limited mode")
+                                        .font(PareFont.body(13, weight: .medium))
+                                        .foregroundStyle(PareColor.ink)
+                                    Text("Pare's privileged helper isn't installed. Results may be incomplete for TCC-protected paths.")
+                                        .font(PareFont.body(12))
+                                        .foregroundStyle(PareColor.ink3)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                                Spacer()
+                            }
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 12)
+                            .background(PareColor.warningSoft)
+                            .clipShape(RoundedRectangle(cornerRadius: PareRadius.standard))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: PareRadius.standard)
+                                    .stroke(PareColor.warning.opacity(0.4), lineWidth: 1)
+                            )
+                            .padding(.bottom, 14)
+                        }
+
                         // Scan progress
                         if vm.isLoading {
                             VStack(alignment: .leading, spacing: 6) {

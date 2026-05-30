@@ -96,7 +96,7 @@ struct StorageOverTimeChart: View {
     }
 
     private var chartSubtitle: String {
-        guard let first = data.first, let last = data.last else { return "" }
+        guard let last = data.last else { return "" }
         let usedGB = Int(last.gb)
         if markers.isEmpty {
             return "\(usedGB) GB used. Clean files to see changes over time."

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+    Entitlements for the privileged helper daemon.
+
+    The helper is intentionally NOT sandboxed: it holds Full Disk Access and
+    needs to walk arbitrary paths the user grants via TCC. Hardened runtime
+    is still required for notarisation — see Tools/sign-helper.sh.
+-->
+<plist version="1.0">
+<dict>
+    <key>com.apple.security.app-sandbox</key>
+    <false/>
+</dict>
+</plist>

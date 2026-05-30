@@ -26,8 +26,15 @@
     {
       "label": "swift-format: Lint",
       "type": "shell",
-      "command": "swift-format",
-      "args": ["lint", "-r", "--strict", "App", "Helper", "PareKit"],
+      "command": "xcrun",
+      "args": ["swift-format", "lint", "-r", "--strict", "App", "Helper", "PareKit"],
+      "problemMatcher": []
+    },
+    {
+      "label": "swift-format: Format in place",
+      "type": "shell",
+      "command": "xcrun",
+      "args": ["swift-format", "format", "-r", "-i", "App", "Helper", "PareKit"],
       "problemMatcher": []
     }
   ]

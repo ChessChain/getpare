@@ -2,6 +2,7 @@
 
 import Foundation
 import SwiftUI
+import PareKit
 
 struct AppEntry: Identifiable {
     let id: String
@@ -45,6 +46,9 @@ final class UninstallerViewModel: ObservableObject {
     @Published var cleanedCount = 0
     @Published var cleanedSize: Int64 = 0
 
+    /// True when the App is walking the filesystem directly. Banner shown.
+    @Published var isLimitedMode: Bool = false
+
     var selectedCount: Int {
         displayedApps.filter(\.isSelected).count + leftovers.filter(\.isSelected).count
     }
@@ -65,7 +69,102 @@ final class UninstallerViewModel: ObservableObject {
         Color(red: 0.592, green: 0.580, blue: 0.549),
     ]
 
-    init() { loadApps() }
+    init() {
+        Task { @MainActor in
+            let handled = await self.loadViaHelper()
+            if !handled {
+                self.isLimitedMode = true
+                self.loadAppsLocally()
+            }
+        }
+    }
+
+    /// Attempt to load apps + residue + leftovers via the privileged helper.
+    /// Returns false when the helper isn't enabled or errored.
+    @MainActor
+    private func loadViaHelper() async -> Bool {
+        let vm = self
+        let scanItems = await HelperScanRoute.fetch(categories: [.uninstaller]) { progress in
+            Task { @MainActor in
+                vm.scanTask = progress.currentTask
+                vm.scanProgress = progress.percent
+            }
+        }
+        guard let scanItems = scanItems else { return false }
+
+        let entries = Self.assembleEntries(from: scanItems)
+        installedApps = entries.installed
+        leftovers = entries.leftovers
+        applyFilter()
+        scanProgress = 1.0
+        scanTask = "Complete (via helper)"
+        isLoading = false
+        isLimitedMode = false
+        return true
+    }
+
+    /// Translates the helper's flat `[ScanItem]` into the App's
+    /// `installedApps + leftovers` shape, grouping by `groupID`.
+    /// - Item with `subcategory == "app"` becomes the head of an installed entry.
+    /// - Items with `subcategory == "leftover"` group into a leftover entry,
+    ///   keyed by `groupID` (the scanner shares one per inferred bundle id).
+    /// - `subcategory == "residue"` items attach to the matching app via groupID.
+    private static func assembleEntries(
+        from items: [ScanItem]
+    ) -> (installed: [AppEntry], leftovers: [AppEntry]) {
+        let grouped = Dictionary(grouping: items) { $0.groupID ?? UUID() }
+        var installed: [AppEntry] = []
+        var leftovers: [AppEntry] = []
+        var iconIndex = 0
+
+        for (_, group) in grouped {
+            let head = group.first { $0.metadata["subcategory"] == "app" }
+                ?? group.first { $0.metadata["subcategory"] == "leftover" }
+            guard let head = head else { continue }
+
+            let isLeftover = head.metadata["subcategory"] == "leftover"
+            let nonHead = group.filter { $0.id != head.id }
+            let residueBytes = nonHead.reduce(Int64(0)) { $0 + $1.bytes }
+            let residuePaths = nonHead.map(\.path)
+            let bundleID = head.metadata["bundle_id"] ?? ""
+            let displayName = head.metadata["display_name"]
+                ?? bundleID.split(separator: ".").last.map(String.init)?.capitalized
+                ?? head.path.deletingPathExtension().lastPathComponent
+
+            let color = iconColors[iconIndex % iconColors.count]
+            iconIndex += 1
+
+            let meta: String
+            if isLeftover {
+                meta = "Caches, prefs, app support left over \u{00B7} \(group.count) paths"
+            } else {
+                let lastUsed = relativeDate(head.lastAccessed)
+                meta = "last used \(lastUsed)"
+            }
+
+            let entry = AppEntry(
+                id: head.path.path,
+                name: displayName,
+                meta: meta,
+                bundleId: bundleID,
+                appBytes: isLeftover ? 0 : head.bytes,
+                residueBytes: residueBytes,
+                residuePaths: residuePaths + (isLeftover ? [head.path] : []),
+                isSelected: isLeftover,
+                iconColor: color,
+                url: head.path
+            )
+            if isLeftover {
+                leftovers.append(entry)
+            } else {
+                installed.append(entry)
+            }
+        }
+
+        installed.sort { $0.totalBytes > $1.totalBytes }
+        leftovers.sort { $0.totalBytes > $1.totalBytes }
+        return (installed, leftovers)
+    }
 
     func toggleApp(_ id: String) {
         if let i = displayedApps.firstIndex(where: { $0.id == id }) {
@@ -174,9 +273,9 @@ final class UninstallerViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Scan
+    // MARK: - Scan (local fallback)
 
-    private func loadApps() {
+    private func loadAppsLocally() {
         let vm = self
         let home = FileManager.default.homeDirectoryForCurrentUser
 
