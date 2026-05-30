@@ -293,6 +293,14 @@ final class HelperTests: XCTestCase {
         }
     }
 
+    // ── HashIndex dispatch (ADR-0005) ────────────────────────────────
+
+    func testHashIndexChoosesAlgorithmBySize() {
+        XCTAssertEqual(HashIndex.algorithm(forSize: 1), .sha256)
+        XCTAssertEqual(HashIndex.algorithm(forSize: HashIndex.blake3Threshold), .sha256)
+        XCTAssertEqual(HashIndex.algorithm(forSize: HashIndex.blake3Threshold + 1), .blake3)
+    }
+
     // ── UninstallerScanner ───────────────────────────────────────────
 
     /// Build a minimal but enumerator-realistic `Foo.app` bundle.

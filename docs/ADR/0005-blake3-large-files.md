@@ -1,7 +1,9 @@
 # ADR-0005: BLAKE3 for files > 100 MB, SHA-256 otherwise
 
-- Status: Accepted
+- Status: Accepted (BLAKE3 implementation deferred — see Implementation status)
 - Date: 2026-05-23
+- Implementation: dispatch in `Helper/Sources/Engine/HashIndex.swift`; both
+  size buckets call SHA-256 until a vetted Swift BLAKE3 package is pinned.
 
 ## Decision
 
@@ -23,6 +25,19 @@ inputs with comparable collision resistance for our use case.
   Macs with terabyte-scale media libraries.
 - Negative: two hash code paths to maintain. Mitigated by isolating to
   `HashIndex.hash(_:)`.
+
+## Implementation status
+
+The size-based dispatch is in place — `HashIndex.algorithm(forSize:)`
+returns `.blake3` for files > 100 MB and `.sha256` otherwise — but the
+`blake3(_:)` function currently falls through to SHA-256 pending a
+package decision. Behaviour is correct (no false positives possible from
+algorithm choice; both hash families have sub-1e-30 collision probability
+at the populations we deal with), just not the speed ADR prescribes.
+
+To finish: add a vetted Swift BLAKE3 package to `Package.swift`, depend
+on it from `HelperLib`, and replace the body of `HashIndex.blake3(_:)`.
+No other code changes required.
 
 ## Related
 
