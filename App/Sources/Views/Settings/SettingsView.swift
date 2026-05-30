@@ -163,6 +163,7 @@ public struct SettingsView: View {
     // MARK: - Privacy
 
     @ObservedObject private var permissions = PermissionManager.shared
+    @ObservedObject private var installer = HelperInstaller.shared
 
     private var privacyPanel: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -211,6 +212,10 @@ public struct SettingsView: View {
                 permissions.hasFullDiskAccess ? PareColor.accentLine : Color(red: 0.894, green: 0.784, blue: 0.588), lineWidth: 1))
             .padding(.bottom, 16)
 
+            // Privileged helper status
+            helperStatusBlock
+                .padding(.bottom, 16)
+
             row("Anonymous telemetry", "Event counts only (no paths, filenames, or contents). Off by default.") {
                 Toggle("", isOn: $s.telemetryEnabled).toggleStyle(.switch).tint(PareColor.forest)
             }
@@ -237,6 +242,105 @@ public struct SettingsView: View {
                     .background(PareColor.accentSoft).clipShape(Capsule())
                     .overlay(Capsule().stroke(PareColor.accentLine, lineWidth: 1))
             }
+        }
+    }
+
+    /// Block in the Privacy panel showing the privileged helper's install state.
+    @ViewBuilder
+    private var helperStatusBlock: some View {
+        let copy = helperCopy(for: installer.status)
+        HStack(spacing: 14) {
+            Image(systemName: copy.icon)
+                .font(.system(size: 20))
+                .foregroundStyle(copy.tint)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Privileged helper")
+                    .font(PareFont.body(13, weight: .medium))
+                    .foregroundStyle(PareColor.ink)
+                Text(copy.body)
+                    .font(PareFont.body(12))
+                    .foregroundStyle(PareColor.ink3)
+                    .lineSpacing(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer()
+            switch installer.status {
+            case .enabled:
+                Text("INSTALLED")
+                    .font(PareFont.mono(10, weight: .medium))
+                    .foregroundStyle(PareColor.forest)
+                    .padding(.horizontal, 8).padding(.vertical, 3)
+                    .background(PareColor.accentSoft).clipShape(Capsule())
+                    .overlay(Capsule().stroke(PareColor.accentLine, lineWidth: 1))
+            case .requiresApproval:
+                Button {
+                    installer.openLoginItemsSettings()
+                } label: {
+                    Text("Open Login Items")
+                        .font(PareFont.body(13, weight: .medium))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 16).padding(.vertical, 8)
+                        .background(PareColor.forest)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                }.buttonStyle(.plain)
+            case .notInstalled:
+                Button {
+                    installer.registerIfNeeded()
+                } label: {
+                    Text("Install")
+                        .font(PareFont.body(13, weight: .medium))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 16).padding(.vertical, 8)
+                        .background(PareColor.forest)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                }.buttonStyle(.plain)
+            case .unsupported:
+                EmptyView()
+            }
+        }
+        .padding(16)
+        .background(helperBackground(for: installer.status))
+        .clipShape(RoundedRectangle(cornerRadius: PareRadius.standard))
+        .overlay(
+            RoundedRectangle(cornerRadius: PareRadius.standard)
+                .stroke(helperBorder(for: installer.status), lineWidth: 1)
+        )
+    }
+
+    private func helperCopy(
+        for status: HelperInstaller.InstallStatus
+    ) -> (icon: String, tint: Color, body: String) {
+        switch status {
+        case .enabled:
+            return ("checkmark.shield.fill", PareColor.forest,
+                    "Installed — every scan and cleanup runs through the privileged helper with Full Disk Access.")
+        case .requiresApproval:
+            return ("exclamationmark.shield", PareColor.warning,
+                    "Pending approval — open System Settings → Login Items and enable Pare to finish setup.")
+        case .notInstalled:
+            return ("xmark.shield", PareColor.warning,
+                    "Not installed — Pare is running in limited mode and walks the filesystem directly. Some TCC-protected paths may be invisible.")
+        case .unsupported(let reason):
+            return ("info.circle", PareColor.ink3,
+                    "Unavailable: \(reason)")
+        }
+    }
+
+    private func helperBackground(for status: HelperInstaller.InstallStatus) -> Color {
+        switch status {
+        case .enabled:          return PareColor.accentSoft
+        case .requiresApproval: return PareColor.warningSoft
+        case .notInstalled:     return PareColor.warningSoft
+        case .unsupported:      return PareColor.surface2
+        }
+    }
+
+    private func helperBorder(for status: HelperInstaller.InstallStatus) -> Color {
+        switch status {
+        case .enabled:          return PareColor.accentLine
+        case .requiresApproval: return Color(red: 0.894, green: 0.784, blue: 0.588)
+        case .notInstalled:     return Color(red: 0.894, green: 0.784, blue: 0.588)
+        case .unsupported:      return PareColor.line
         }
     }
 

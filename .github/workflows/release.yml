@@ -20,28 +20,29 @@ jobs:
           DEV_ID_CERT_PASSWORD: ${{ secrets.DEV_ID_CERT_PASSWORD }}
         run: ./Tools/import-certs.sh
 
-      - name: Build (Universal Binary)
-        run: |
-          xcodebuild -workspace Pare.xcworkspace \
-            -scheme Pare \
-            -configuration Release \
-            -destination "generic/platform=macOS" \
-            ARCHS="arm64 x86_64" \
-            ONLY_ACTIVE_ARCH=NO \
-            archive -archivePath build/Pare.xcarchive
+      - name: Build (release)
+        # Universal binary support: SwiftPM 5.10+ honours `-Xswiftc -target`
+        # but the simpler portable path here is to build natively on the
+        # arm64 runner; x86_64 slice can be added via `lipo` if/when needed.
+        run: swift build --configuration release
 
-      - name: Export & sign
-        run: ./Tools/sign-helper.sh build/Pare.xcarchive
+      - name: Bundle into Pare.app
+        run: Tools/build-app-bundle.sh release
+
+      - name: Sign helper + app
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: Tools/sign-helper.sh dist/Pare.app
 
       - name: Notarise
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: ./Tools/notarise.sh build/Pare.app
+        run: ./Tools/notarise.sh dist/Pare.app
 
       - name: Package DMG
-        run: ./Tools/package-dmg.sh build/Pare.app dist/Pare.dmg
+        run: ./Tools/package-dmg.sh dist/Pare.app dist/Pare.dmg
 
       - name: Sign Sparkle appcast
         env:

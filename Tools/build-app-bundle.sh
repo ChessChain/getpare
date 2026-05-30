@@ -54,12 +54,33 @@ cp Helper/com.clearpath.pare.helper.plist \
 
 # ── Resources ────────────────────────────────────────────────────────────
 # SPM emits an *.bundle directory next to the binary for `resources:
-# [.process(...)]` outputs. We copy its contents straight into Resources/.
-# Apple's `actool` is not invoked by SPM, so Assets.xcassets ships as the
-# raw catalog rather than a compiled Assets.car. Named-asset lookups
-# (Image("foo")) won't resolve until you wire actool into a build step.
+# [.process(...)]` outputs. We copy its contents straight into Resources/,
+# then run `actool` on any Assets.xcassets so named-asset lookups (e.g.
+# Image("AppIcon")) resolve at runtime via the compiled Assets.car.
 if [ -d "$BUILD_DIR/Pare_AppLib.bundle" ]; then
     cp -R "$BUILD_DIR/Pare_AppLib.bundle"/. "$APP/Contents/Resources/"
+fi
+
+if [ -d "$APP/Contents/Resources/Assets.xcassets" ]; then
+    # actool fails on an empty catalog (only Contents.json), so skip when
+    # there are no imagesets/appiconsets/etc. yet.
+    if find "$APP/Contents/Resources/Assets.xcassets" -mindepth 1 \
+        \( -name "*.imageset" -o -name "*.appiconset" -o -name "*.symbolset" \
+           -o -name "*.colorset" -o -name "*.dataset" \) -print -quit \
+        | grep -q .; then
+        xcrun actool "$APP/Contents/Resources/Assets.xcassets" \
+            --compile "$APP/Contents/Resources" \
+            --platform macosx \
+            --minimum-deployment-target 13.0 \
+            --app-icon AppIcon \
+            --output-partial-info-plist "$APP/Contents/Resources/assets.plist" \
+            >/dev/null
+        rm -rf "$APP/Contents/Resources/Assets.xcassets"
+        rm -f  "$APP/Contents/Resources/assets.plist"
+    else
+        # Empty catalog — drop it so it doesn't ship as dead weight.
+        rm -rf "$APP/Contents/Resources/Assets.xcassets"
+    fi
 fi
 
 # ── Info.plist ───────────────────────────────────────────────────────────
