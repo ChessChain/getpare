@@ -24,9 +24,13 @@ final class AppTests: XCTestCase {
     }
 
     func testSystemStorageProviderReturnsNonZeroCapacity() {
-        let snap = SystemStorageProvider.snapshot()
-        XCTAssertGreaterThan(snap.totalCapacity, 0, "Volume total capacity should be > 0")
-        XCTAssertGreaterThan(snap.availableBytes, 0, "Available bytes should be > 0")
-        XCTAssertLessThan(snap.usedBytes, snap.totalCapacity, "Used should be less than total")
+        // Hit the fast path — `snapshot()` walks the whole user home and
+        // /Applications, which makes the test take minutes. The values we
+        // care about (capacity, free) come straight from
+        // `attributesOfFileSystem` and don't need any of that work.
+        let (total, available) = SystemStorageProvider.volumeStats()
+        XCTAssertGreaterThan(total, 0, "Volume total capacity should be > 0")
+        XCTAssertGreaterThan(available, 0, "Available bytes should be > 0")
+        XCTAssertLessThan(total - available, total, "Used should be less than total")
     }
 }

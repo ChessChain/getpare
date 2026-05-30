@@ -2,14 +2,25 @@
 # Tools/sign-helper.sh — codesign the helper binary, then the app bundle.
 # Order matters: nested binaries must be signed first. Hardened runtime on,
 # secure-timestamp on, entitlements per Technical Design §7.
+#
+# Accepts either an .xcarchive (release pipeline) or a plain .app produced
+# by Tools/build-app-bundle.sh (local dev / unsigned-to-signed flow).
 
 set -euo pipefail
 
-ARCHIVE="${1:?Usage: sign-helper.sh <Pare.xcarchive>}"
+INPUT="${1:?Usage: sign-helper.sh <Pare.xcarchive | Pare.app>}"
 TEAM_ID="${APPLE_TEAM_ID:?APPLE_TEAM_ID must be set}"
 IDENTITY="Developer ID Application: ClearPath Digital ($TEAM_ID)"
 
-APP_PATH="$ARCHIVE/Products/Applications/Pare.app"
+if [ "${INPUT##*.}" = "xcarchive" ]; then
+    APP_PATH="$INPUT/Products/Applications/Pare.app"
+elif [ "${INPUT##*.}" = "app" ]; then
+    APP_PATH="$INPUT"
+else
+    echo "Unrecognised input: expected .xcarchive or .app, got $INPUT" >&2
+    exit 1
+fi
+
 HELPER_BIN="$APP_PATH/Contents/MacOS/com.clearpath.pare.helper"
 HELPER_PLIST="$APP_PATH/Contents/Library/LaunchDaemons/com.clearpath.pare.helper.plist"
 

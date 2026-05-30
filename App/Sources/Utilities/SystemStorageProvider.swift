@@ -63,7 +63,10 @@ public enum SystemStorageProvider {
 
     // MARK: - Volume Stats
 
-    private static func volumeStats() -> (total: Int64, available: Int64) {
+    /// Fast volume capacity / free-space read. No directory walking, so
+    /// safe to call from tests and hot UI paths. The rich `snapshot()`
+    /// uses this internally and adds per-category directory sizes.
+    public static func volumeStats() -> (total: Int64, available: Int64) {
         do {
             let attrs = try FileManager.default.attributesOfFileSystem(forPath: "/")
             let total = (attrs[.systemSize] as? Int64) ?? 0
